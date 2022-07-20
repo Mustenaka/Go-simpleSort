@@ -1,17 +1,18 @@
 package simplesort
 
 import (
+	"fmt"
 	"testing"
 )
 
 func TestSimplesort(t *testing.T) {
-	// 定义测试结构体
+	// define test structure
 	type book struct {
 		id    int
 		title string
 	}
 
-	// 构造一个乱序数组
+	// Construct an out-of-order array
 	books := []book{
 		{id: 5, title: "Go语言"},
 		{id: 1, title: "Python语言"},
@@ -20,17 +21,23 @@ func TestSimplesort(t *testing.T) {
 		{id: 3, title: "C语言"},
 	}
 
-	Simplesort(books, "id", true)
+	result, err := Simplesort(books, "id", true)
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(result)
+	}
 }
 
 func TestFunctionTest(t *testing.T) {
-	// 定义测试结构体
+	// define test structure
 	type book struct {
 		id    int
 		title string
 	}
 
-	// 构造一个乱序数组
+	// Construct an out-of-order array
 	books := []book{
 		{id: 5, title: "Go语言"},
 		{id: 1, title: "Python语言"},
