@@ -13,7 +13,27 @@ type SortBy []interface{}
 func (a SortBy) Len() int      { return len(a) }
 func (a SortBy) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a SortBy) Less(i, j int) bool {
-	return false
+	// Get Sort index
+	sortIndex := sortConfig.GetInstance().GetIndex()
+
+	// loaction the index of the target field in the structure
+	fieldValue1 := reflect.ValueOf(a[i]).Field(sortIndex)
+	fieldValue2 := reflect.ValueOf(a[j]).Field(sortIndex)
+
+	// assert the type of the target field
+	switch fieldValue1.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return fieldValue1.Int() < fieldValue2.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return fieldValue1.Uint() < fieldValue2.Uint()
+	case reflect.Float32, reflect.Float64:
+		return fieldValue1.Float() < fieldValue2.Float()
+	case reflect.String:
+		return fieldValue1.String() < fieldValue2.String()
+	// not support other type
+	default:
+		panic("unsupported kind")
+	}
 }
 
 // @title Simplesort
@@ -23,24 +43,22 @@ func (a SortBy) Less(i, j int) bool {
 // @param order bool "oder or reverse order"
 // @return interface{}, error "sort results, nil if no error."
 func Simplesort(args interface{}, filedName string, order bool) ([]interface{}, error) {
-	// 输出数据
-	fmt.Println("input: ", args)
+	// print input data(args)
+	// fmt.Println("input: ", args)
 
 	// interface{} convert to []interface{}
 	var interfaceSlice []interface{}
 
-	// 判断类型
+	// assest type of args, it must be struct. (feat) need support other type.
 	if reflect.TypeOf(args).Kind() != reflect.Slice {
-		panic("input need slice kind")
+		// panic("input need slice kind")
+		return nil, fmt.Errorf("input need slice kind")
 	}
 
-	// 输出类型信息
-	fmt.Println("args typeof kind: " + reflect.TypeOf(args).Kind().String())
-
-	// 定位目标字段在结构体中的索引
+	// locate the index of the target field in the structure
 	var index int = 0
 
-	// 切片处理
+	// get the value of the target field, and convert it to []interface{}
 	s := reflect.ValueOf(args)
 	for i := 0; i < s.Len(); i++ {
 		ele := s.Index(i)
@@ -48,7 +66,7 @@ func Simplesort(args interface{}, filedName string, order bool) ([]interface{}, 
 
 		interfaceSlice = append(interfaceSlice, ele.Interface())
 
-		// 检查需要排序字段是否包含在结构体中
+		// check the type of the target field
 		var isExist bool = false
 		for ii := 0; ii < ele.NumField(); ii++ {
 			// fmt.Printf("name: %s, type: %s, value: %v\n",
@@ -61,20 +79,21 @@ func Simplesort(args interface{}, filedName string, order bool) ([]interface{}, 
 			}
 		}
 
-		// 未找到需要排序的字段，抛出错误
+		// check the target field is not exist
 		if !isExist {
-			panic("not found filed: " + filedName)
+			// panic("not found filed: " + filedName)
+			return nil, fmt.Errorf("not found filed: %s", filedName)
 		}
 	}
 
-	// 处理完成，初始化排序的配置 - 用单例的方式注入Less方法
+	// Initialize the configuration of sorting - inject the Less() with a singleton
 	sortConfig.CreateInstance(index, filedName, order)
 
-	// 对结构体数组进行排序
+	// sort
 	sort.Sort(SortBy(interfaceSlice))
 
-	// 输出数据
-	fmt.Println("output: ", interfaceSlice)
+	// output and return the result
+	// fmt.Println("output: ", interfaceSlice)
 	return interfaceSlice, nil
 }
 
@@ -106,7 +125,7 @@ func FunctionTest(data interface{}) {
 	}
 }
 
-// 单例模式测试
+// test instance of Simplesort
 func SinTest(filedName string) {
 	sortConfig.CreateInstance(2, filedName, true)
 
