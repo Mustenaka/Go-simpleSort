@@ -1,23 +1,21 @@
 package sortConfig
 
 type sortConfig struct {
-	index int    // 字段索引
-	name  string // 字段名称
-	order bool   // 排序方式 - true顺序，false逆序
+	index int
+	name  string
+	order bool // true: ascending, false: descending
 }
 
 type SortConfig interface {
-	// 获取index
 	GetIndex() int
-	// 获取name
 	GetName() string
+	GetOrder() bool
 }
 
 var _ SortConfig = (*sortConfig)(nil)
-
 var instance *sortConfig
 
-// 获取单例
+// CreateSortConfig instance
 func CreateInstance(index int, name string, order bool) *sortConfig {
 	if instance == nil {
 		instance = NewSortConfig(index, name, order)
@@ -25,12 +23,12 @@ func CreateInstance(index int, name string, order bool) *sortConfig {
 	return instance
 }
 
-// 获取单例
+// GetSortConfig instance
 func GetInstance() *sortConfig {
 	return instance
 }
 
-// 初始化
+// initlize the configuration of sorting
 func NewSortConfig(index int, name string, order bool) *sortConfig {
 	return &sortConfig{
 		index: index,
