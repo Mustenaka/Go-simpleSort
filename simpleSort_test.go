@@ -42,6 +42,10 @@ func TestFunctionTest(t *testing.T) {
 	FunctionTest(books)
 }
 
+func TestSinTest(t *testing.T) {
+	SinTest("title")
+}
+
 func TestSimplesortStable(t *testing.T) {
 	SimplesortStable([]interface{}{1, 2, 3, 4, 5})
 }
